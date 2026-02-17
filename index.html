@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JLV Store | Tu idea hecha realidad</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { brand: { 500: '#1378c7', 700: '#0f4f9c' } },
+          keyframes: {
+            float: { '0%,100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-6px)' } },
+            fadeIn: { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' } }
+          },
+          animation: { float: 'float 3.2s ease-in-out infinite', fadeIn: 'fadeIn .25s ease' }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass { backdrop-filter: blur(12px); background: rgba(255,255,255,.74); }
+    .dark .glass { background: rgba(15,23,42,.74); }
+    dialog::backdrop { background: rgba(0,0,0,.62); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
+  <header class="sticky top-0 z-40 border-b border-slate-200/70 dark:border-slate-800 glass">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 justify-between">
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <div class="text-3xl sm:text-4xl font-black tracking-tight leading-none">JLV</div>
+          <div class="absolute -right-2 -top-1 w-4 h-6 bg-gradient-to-b from-red-500 via-fuchsia-500 to-emerald-500 rounded-[50%_50%_58%_58%] border-2 border-brand-500 animate-float"></div>
+        </div>
+        <p class="hidden sm:block italic text-sm opacity-80">— Tu idea hecha realidad —</p>
+      </div>
+      <nav class="flex items-center gap-2">
+        <button id="themeBtn" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700">🌙/☀️</button>
+        <button id="cartBtn" class="px-3 py-2 rounded-xl bg-brand-500 text-white">🛒 <span id="cartCount">0</span></button>
+        <button id="roleBtn" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700">Modo: Cliente</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-10">
+    <section class="rounded-3xl p-6 sm:p-10 bg-gradient-to-br from-slate-900 via-slate-800 to-brand-700 text-white relative overflow-hidden">
+      <div class="absolute right-4 top-4 text-7xl opacity-20 font-black">JLV</div>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight">Tienda profesional minimalista</h1>
+      <p class="mt-3 max-w-xl text-slate-200">100% responsive, carrito dinámico, analíticas administrativas, control por usuario y compra por WhatsApp.</p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href="#catalogo" class="px-4 py-2 rounded-xl bg-white text-slate-900 font-semibold">Ver productos</a>
+        <a href="#admin" class="px-4 py-2 rounded-xl border border-white/30">Panel admin</a>
+      </div>
+    </section>
+
+    <section class="grid sm:grid-cols-3 gap-3">
+      <input id="searchInput" class="sm:col-span-2 p-3 rounded-xl border bg-transparent" placeholder="Buscar producto..."/>
+      <select id="categoryFilter" class="p-3 rounded-xl border bg-transparent">
+        <option value="all">Todas las categorías</option>
+      </select>
+    </section>
+
+    <section id="mas-vendidos" class="space-y-3">
+      <div class="flex justify-between items-center"><h2 class="text-2xl font-bold">Carrusel de más vendidos (clic para abrir)</h2></div>
+      <div id="bestSellerTrack" class="flex gap-4 overflow-x-auto pb-2 snap-x"></div>
+    </section>
+
+    <section id="catalogo">
+      <div class="flex items-center justify-between mb-4"><h2 class="text-2xl font-bold">Productos</h2><span id="roleNotice" class="text-sm opacity-70">Vista cliente: solo compra.</span></div>
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <section id="admin" class="rounded-3xl border border-slate-200 dark:border-slate-800 p-5 space-y-6 hidden">
+      <div class="flex items-center justify-between"><h2 class="text-2xl font-bold">Panel Administrador</h2><button id="addProductBtn" class="px-3 py-2 bg-brand-500 text-white rounded-xl">+ Nuevo artículo</button></div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <article class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900"><p class="text-xs opacity-70">Artículo más vendido</p><p id="kpiTop" class="text-lg font-bold">-</p></article>
+        <article class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900"><p class="text-xs opacity-70">Ventas este mes</p><p id="kpiThisMonth" class="text-lg font-bold">L 0.00</p></article>
+        <article class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900"><p class="text-xs opacity-70">Ventas mes pasado</p><p id="kpiLastMonth" class="text-lg font-bold">L 0.00</p></article>
+        <article class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900"><p class="text-xs opacity-70">Producto más llevado</p><p id="kpiMostQty" class="text-lg font-bold">-</p></article>
+      </div>
+      <div class="grid sm:grid-cols-[1fr_auto_auto] gap-3 items-end">
+        <label><span class="text-sm">Ajuste global (%)</span><input id="bulkInput" type="number" class="mt-1 w-full p-2 rounded-xl border bg-transparent" placeholder="Ej: 10 o -5"/></label>
+        <button id="bulkApplyBtn" class="px-4 py-2 rounded-xl border">Aplicar %</button>
+        <button id="seedSalesBtn" class="px-4 py-2 rounded-xl border">Simular ventas</button>
+      </div>
+      <div id="adminList" class="space-y-3"></div>
+    </section>
+  </main>
+
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full sm:w-[430px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 transform translate-x-full transition-transform z-50 p-4 flex flex-col">
+    <div class="flex items-center justify-between mb-4"><h3 class="text-xl font-bold">Carrito</h3><button id="closeCart" class="text-purple-500 text-2xl">✕</button></div>
+    <div id="cartItems" class="flex-1 space-y-3 overflow-auto"></div>
+    <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-3">
+      <p class="font-bold">Total: <span id="cartTotal">L 0.00</span></p>
+      <a id="waCheckout" target="_blank" class="w-full block text-center bg-green-500 text-black font-bold py-3 rounded-xl">Comprar por WhatsApp</a>
+    </div>
+  </aside>
+
+  <a id="waFab" target="_blank" class="fixed bottom-5 right-5 w-14 h-14 rounded-full bg-green-500 text-black flex items-center justify-center text-2xl shadow-xl">☎</a>
+  <footer class="text-center text-xs pb-6 opacity-75">Todos los derechos reservados por Luis Sauceda 2026.</footer>
+
+  <dialog id="productModal" class="rounded-2xl p-0 w-[95vw] max-w-2xl backdrop:bg-black/60">
+    <div class="p-4 sm:p-6 bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 animate-fadeIn">
+      <div class="flex justify-between items-start gap-3">
+        <h4 id="modalTitle" class="text-2xl font-bold"></h4>
+        <button onclick="productModal.close()" class="text-purple-500 text-2xl">✕</button>
+      </div>
+      <img id="modalImage" class="mt-3 w-full h-64 object-cover rounded-xl" alt="producto" />
+      <p id="modalDesc" class="mt-3 text-slate-700 dark:text-slate-300"></p>
+      <p id="modalPrice" class="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100"></p>
+      <div class="mt-4 flex items-center gap-3">
+        <div class="flex items-center gap-2 border rounded-xl px-3 py-2 dark:border-slate-600">
+          <button id="modalMinus" class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800">-</button>
+          <span id="modalQty" class="min-w-6 text-center font-bold">1</span>
+          <button id="modalPlus" class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800">+</button>
+        </div>
+        <button id="modalAdd" class="px-4 py-2 rounded-xl bg-brand-500 text-white">Añadir al carrito</button>
+      </div>
+    </div>
+  </dialog>
+
+<script>
+const ADMIN_USER='admin';
+const ADMIN_PASS='JLV2026';
+const phone='50497007920';
+const currency=(v)=>`L ${v.toFixed(2)}`;
+const img=(seed)=>`https://picsum.photos/seed/${seed}/600/500`;
+
+let role=localStorage.getItem('jlv_role')||'client';
+let dark=localStorage.getItem('jlv_dark')==='1';
+let cart=JSON.parse(localStorage.getItem('jlv_cart')||'[]');
+let sales=JSON.parse(localStorage.getItem('jlv_sales')||'[]');
+let wishlist=JSON.parse(localStorage.getItem('jlv_wishlist')||'[]');
+let modalCurrentId=null,modalQty=1;
+let products=JSON.parse(localStorage.getItem('jlv_products')||'null')||[
+  {id:1,name:'Camisa Premium',description:'Tela premium y corte minimalista.',price:850,image:img('shirt'),category:'Ropa',sold:34},
+  {id:2,name:'Hoodie JLV',description:'Comodidad total para diario.',price:1250,image:img('hoodie'),category:'Ropa',sold:42},
+  {id:3,name:'Bolso Urbano',description:'Resistente y elegante.',price:990,image:img('bag'),category:'Accesorios',sold:27},
+  {id:4,name:'Tenis Studio',description:'Ligero con suela flexible.',price:1800,image:img('sneaker'),category:'Calzado',sold:58},
+  {id:5,name:'Gorra Signature',description:'Diseño limpio con logo.',price:420,image:img('cap'),category:'Accesorios',sold:19},
+  {id:6,name:'Reloj Motion',description:'Estilo moderno y sobrio.',price:2100,image:img('watch'),category:'Accesorios',sold:21},
+];
+
+function save(){
+  localStorage.setItem('jlv_products',JSON.stringify(products));
+  localStorage.setItem('jlv_cart',JSON.stringify(cart));
+  localStorage.setItem('jlv_sales',JSON.stringify(sales));
+  localStorage.setItem('jlv_role',role);
+  localStorage.setItem('jlv_dark',dark?'1':'0');
+  localStorage.setItem('jlv_wishlist',JSON.stringify(wishlist));
+}
+function applyTheme(){document.documentElement.classList.toggle('dark',dark)}
+function categories(){return ['all',...new Set(products.map(p=>p.category))]}
+
+function applyRole(){
+  roleBtn.textContent=`Modo: ${role==='admin'?'Administrador':'Cliente'}`;
+  admin.classList.toggle('hidden',role!=='admin');
+  roleNotice.textContent=role==='admin'?'Vista administrador: edición habilitada.':'Vista cliente: solo compra.';
+}
+
+function filteredProducts(){
+  const s=(searchInput.value||'').toLowerCase().trim();
+  const c=categoryFilter.value;
+  return products.filter(p=>(c==='all'||p.category===c)&&(`${p.name} ${p.description}`.toLowerCase().includes(s)));
+}
+
+function renderBestSellers(){
+  bestSellerTrack.innerHTML=[...products].sort((a,b)=>b.sold-a.sold).slice(0,6).map(p=>`
+    <article onclick="openDetails(${p.id})" class="cursor-pointer min-w-[250px] snap-start rounded-2xl p-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:scale-[1.02] transition">
+      <img src="${p.image}" alt="${p.name}" class="h-40 w-full object-cover rounded-xl"/>
+      <p class="mt-2 font-semibold">${p.name}</p>
+      <p class="text-sm opacity-75">Vendidos: ${p.sold}</p>
+      <p class="font-bold text-brand-500">${currency(p.price)}</p>
+    </article>
+  `).join('');
+}
+
+function qtyControl(id){
+  return `<div class="flex items-center gap-2 border rounded-xl px-2 py-1 dark:border-slate-600"><button onclick="chgQty(${id},-1)" class="px-2 bg-slate-100 dark:bg-slate-800 rounded">-</button><span id="q-${id}" class="min-w-6 text-center font-semibold">1</span><button onclick="chgQty(${id},1)" class="px-2 bg-slate-100 dark:bg-slate-800 rounded">+</button></div>`;
+}
+
+function renderProducts(){
+  const list=filteredProducts();
+  productGrid.innerHTML=list.map(p=>`
+    <article class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
+      <img src="${p.image}" alt="${p.name}" class="h-48 w-full object-cover"/>
+      <div class="p-4 space-y-2">
+        <h3 class="font-bold">${p.name}</h3>
+        <p class="text-sm text-slate-700 dark:text-slate-300 line-clamp-2">${p.description}</p>
+        <p class="font-bold text-brand-500">${currency(p.price)}</p>
+        <div class="flex gap-2 flex-wrap items-center">
+          ${qtyControl(p.id)}
+          <button onclick="openDetails(${p.id})" class="px-3 py-2 rounded-xl border">Ver grande</button>
+          <button onclick="addToCart(${p.id},Number(document.getElementById('q-${p.id}').textContent)||1)" class="px-3 py-2 rounded-xl bg-brand-500 text-white">Comprar</button>
+          <button onclick="toggleWish(${p.id})" class="px-3 py-2 rounded-xl border">${wishlist.includes(p.id)?'★':'☆'}</button>
+          ${role==='admin'?`<button onclick="editProduct(${p.id})" class="px-3 py-2 rounded-xl border">Editar</button><button onclick="deleteProduct(${p.id})" class="px-3 py-2 rounded-xl border border-red-300 text-red-600">Eliminar</button>`:''}
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+window.chgQty=(id,d)=>{
+  const el=document.getElementById(`q-${id}`); if(!el) return;
+  const next=Math.max(1,(Number(el.textContent)||1)+d); el.textContent=String(next);
+}
+
+function renderAdminList(){ adminList.innerHTML=products.map(p=>`<div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 flex justify-between"><span>${p.name}</span><span>${currency(p.price)}</span></div>`).join('') }
+
+window.addToCart=(id,qty=1)=>{
+  const p=products.find(x=>x.id===id); if(!p) return;
+  const i=cart.findIndex(c=>c.id===id);
+  i>=0?cart[i].qty+=qty:cart.push({id:p.id,name:p.name,price:p.price,qty});
+  p.sold += qty;
+  sales.push({productId:p.id,qty,total:p.price*qty,date:new Date().toISOString()});
+  refresh(); save();
+}
+
+window.removeFromCart=(id)=>{cart=cart.filter(c=>c.id!==id);refresh();save();}
+window.adjustCart=(id,d)=>{
+  const i=cart.findIndex(c=>c.id===id); if(i<0) return;
+  cart[i].qty+=d; if(cart[i].qty<=0) cart.splice(i,1);
+  refresh(); save();
+}
+
+function renderCart(){
+  cartCount.textContent=cart.reduce((a,c)=>a+c.qty,0);
+  cartItems.innerHTML=!cart.length?'<p class="opacity-60">No hay productos en carrito.</p>':cart.map(c=>`
+    <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 space-y-2">
+      <div class="flex justify-between"><p class="font-semibold">${c.name}</p><p>${currency(c.price*c.qty)}</p></div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2"><button onclick="adjustCart(${c.id},-1)" class="px-2 rounded bg-slate-200 dark:bg-slate-700">-</button><span>x${c.qty}</span><button onclick="adjustCart(${c.id},1)" class="px-2 rounded bg-slate-200 dark:bg-slate-700">+</button></div>
+        <button onclick="removeFromCart(${c.id})" class="px-2 py-1 rounded border border-red-300 text-red-600">Quitar</button>
+      </div>
+    </div>
+  `).join('');
+  const total=cart.reduce((a,c)=>a+c.price*c.qty,0);
+  cartTotal.textContent=currency(total);
+  const lines=cart.map(c=>`• ${c.name} x${c.qty} = ${currency(c.price*c.qty)}`).join('%0A');
+  const msg=`Hola JLV, quiero comprar:%0A${lines||'Sin artículos'}%0A%0ATotal: ${currency(total)}`;
+  const url=`https://wa.me/${phone}?text=${msg}`;
+  waCheckout.href=url; waFab.href=url;
+}
+
+function monthKey(d){return `${d.getFullYear()}-${d.getMonth()+1}`}
+function analytics(){
+  const now=new Date(),thisM=monthKey(now),prevM=monthKey(new Date(now.getFullYear(),now.getMonth()-1,1));
+  let thisTotal=0,lastTotal=0; const byProductQty={};
+  sales.forEach(s=>{const k=monthKey(new Date(s.date));if(k===thisM)thisTotal+=s.total;if(k===prevM)lastTotal+=s.total;byProductQty[s.productId]=(byProductQty[s.productId]||0)+s.qty;});
+  const top=[...products].sort((a,b)=>b.sold-a.sold)[0];
+  const mostQty=Object.entries(byProductQty).sort((a,b)=>b[1]-a[1])[0];
+  kpiTop.textContent=top?`${top.name} (${top.sold})`:'-';
+  kpiThisMonth.textContent=currency(thisTotal);
+  kpiLastMonth.textContent=currency(lastTotal);
+  const mostP=mostQty?products.find(p=>p.id===Number(mostQty[0])):null;
+  kpiMostQty.textContent=mostP?`${mostP.name} (${mostQty[1]} uds)`:'-';
+}
+
+window.openDetails=(id)=>{
+  const p=products.find(x=>x.id===id); if(!p) return;
+  modalCurrentId=id; modalQty=1; modalQtyEl.textContent='1';
+  modalTitle.textContent=p.name;
+  modalImage.src=p.image;
+  modalDesc.textContent=p.description;
+  modalPrice.textContent=currency(p.price);
+  productModal.showModal();
+}
+window.toggleWish=(id)=>{ wishlist.includes(id)?wishlist=wishlist.filter(x=>x!==id):wishlist.push(id); renderProducts(); save(); }
+window.deleteProduct=(id)=>{ if(role!=='admin') return; products=products.filter(p=>p.id!==id); cart=cart.filter(c=>c.id!==id); refresh(); save(); }
+window.editProduct=(id)=>{
+  if(role!=='admin') return;
+  const p=products.find(x=>x.id===id);
+  const name=prompt('Nombre',p.name); if(!name) return;
+  const description=prompt('Descripción',p.description)||p.description;
+  const price=Number(prompt('Precio',p.price));
+  const category=prompt('Categoría',p.category)||p.category;
+  p.name=name; p.description=description; p.price=Number.isFinite(price)?price:p.price; p.category=category;
+  refresh(); save();
+}
+
+function refresh(){
+  categoryFilter.innerHTML=categories().map(c=>`<option value="${c}">${c==='all'?'Todas las categorías':c}</option>`).join('');
+  renderBestSellers(); renderProducts(); renderAdminList(); renderCart(); analytics();
+}
+
+cartBtn.onclick=()=>cartDrawer.classList.remove('translate-x-full');
+closeCart.onclick=()=>cartDrawer.classList.add('translate-x-full');
+themeBtn.onclick=()=>{dark=!dark;applyTheme();save();};
+roleBtn.onclick=()=>{
+  if(role==='admin'){ role='client'; applyRole(); refresh(); save(); return; }
+  const u=prompt('Usuario administrador');
+  const p=prompt('Contraseña');
+  if(u===ADMIN_USER && p===ADMIN_PASS){ role='admin'; }
+  else alert('Credenciales inválidas');
+  applyRole(); refresh(); save();
+};
+searchInput.oninput=renderProducts;
+categoryFilter.onchange=renderProducts;
+
+addProductBtn.onclick=()=>{
+  const name=prompt('Nombre del producto'); if(!name) return;
+  const description=prompt('Descripción')||'Sin descripción';
+  const price=Number(prompt('Precio en Lempiras','1000'));
+  const category=prompt('Categoría','General')||'General';
+  const image=prompt('URL de imagen (opcional)')||img(name.replace(/\s/g,''));
+  products.push({id:Date.now(),name,description,price:Number.isFinite(price)?price:1000,image,category,sold:0});
+  refresh(); save();
+}
+bulkApplyBtn.onclick=()=>{
+  if(role!=='admin') return;
+  const pct=Number(bulkInput.value); if(!Number.isFinite(pct)) return;
+  products=products.map(p=>({...p,price:Math.max(1,+(p.price*(1+pct/100)).toFixed(2))}));
+  refresh(); save();
+}
+seedSalesBtn.onclick=()=>{
+  const now=new Date();
+  sales=sales.concat(products.slice(0,4).map(p=>({productId:p.id,qty:Math.floor(Math.random()*4)+1,total:p.price*(Math.floor(Math.random()*4)+1),date:new Date(now.getFullYear(),now.getMonth(),Math.ceil(Math.random()*28)).toISOString()})));
+  sales=sales.concat(products.slice(2,6).map(p=>({productId:p.id,qty:Math.floor(Math.random()*3)+1,total:p.price*(Math.floor(Math.random()*3)+1),date:new Date(now.getFullYear(),now.getMonth()-1,Math.ceil(Math.random()*28)).toISOString()})));
+  analytics(); save();
+}
+
+const modalQtyEl=document.getElementById('modalQty');
+modalMinus.onclick=()=>{ modalQty=Math.max(1,modalQty-1); modalQtyEl.textContent=String(modalQty); }
+modalPlus.onclick=()=>{ modalQty++; modalQtyEl.textContent=String(modalQty); }
+modalAdd.onclick=()=>{ if(modalCurrentId) addToCart(modalCurrentId, modalQty); }
+
+applyTheme(); applyRole(); refresh(); save();
+</script>
+</body>
+</html>
